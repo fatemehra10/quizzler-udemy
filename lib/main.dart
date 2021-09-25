@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:quizzler/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 QuizBrain quizBrain = new QuizBrain();
+
 void main() => runApp(Quizzler());
 
 class Quizzler extends StatelessWidget {
@@ -27,26 +29,44 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-
   List<Icon> scoreKeeper = [];
-  
-
-  
-  checkAnswer(bool answer){
+  checkAnswer(bool answer) {
     setState(() {
-      if(quizBrain.questionBank[questionNumber].questionAnswer == answer)
-        scoreKeeper.add(
-            Icon(Icons.check , color: Colors.green,)
-        );
+      if (quizBrain.getCorrectAnswer() == answer)
+        scoreKeeper.add(Icon(
+          Icons.check,
+          color: Colors.green,
+        ));
       else
-        scoreKeeper.add(
-            Icon(Icons.close , color: Colors.red,)
-        );
-      if(questionNumber<quizBrain.questionBank.length)
-        questionNumber++;
+        scoreKeeper.add(Icon(
+          Icons.close,
+          color: Colors.red,
+        ));
     });
+    if (quizBrain.getNextQuestion() == (quizBrain.getQuestionbankLength() - 1)) {
+      Alert(
+          context: context,
+          title: "Finished!",
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          desc: "You've reached end of quiz.",
+          buttons: [
+            DialogButton(
+              padding: EdgeInsets.all(10),
+              color: Colors.lightBlueAccent,
+                width: 210,
+                height: 50,
+                child: new Text("CANCEL" , style: TextStyle(color: Colors.white),),
+                onPressed: () {
+                  setState(() {
+                    scoreKeeper.removeRange(
+                        0, quizBrain.getQuestionbankLength()-1);
+                  });
+                  Navigator.pop(context);
+                }),
+          ],).show();
+    }
   }
-  int questionNumber = 0;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -59,7 +79,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                quizBrain.questionBank[questionNumber].questionText,
+                quizBrain.getCorrectText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -73,8 +93,9 @@ class _QuizPageState extends State<QuizPage> {
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: TextButton(
-              onPressed: ()=>checkAnswer(true),
-              style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green)),
+              onPressed: () => checkAnswer(true),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green)),
               child: Text(
                 'True',
                 style: TextStyle(
@@ -89,8 +110,9 @@ class _QuizPageState extends State<QuizPage> {
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: TextButton(
-              onPressed: ()=>checkAnswer(false),
-              style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
+              onPressed: () => checkAnswer(false),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red)),
               child: Text(
                 'False',
                 style: TextStyle(
@@ -108,4 +130,3 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 }
-
